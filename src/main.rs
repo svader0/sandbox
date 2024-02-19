@@ -1,155 +1,110 @@
-use std::mem::swap;
-
 use macroquad::prelude::*;
+
+// Constants
+const CELL_SIZE: f32 = 8.0;
+const GRID_WIDTH: usize = 128;
+const GRID_HEIGHT: usize = 96;
 
 // Define enum for different types of elements
 #[derive(Clone, Copy, PartialEq)]
 enum Element {
-    Empty,
+    Air,
     Sand,
     Water,
     Wall,
 }
 
-// Define a struct to represent the game grid
+impl Element {}
+
 struct Grid {
-    cells: Vec<Element>,
     width: usize,
     height: usize,
+    elements: Vec<Element>,
 }
 
-// Implement methods for the Grid struct
 impl Grid {
-    fn new(width: usize, height: usize) -> Self {
-        // Initialize the grid with empty cells
-        let cells = vec![Element::Empty; width * height];
-
+    // Create a new grid with the given width and height
+    fn new(width: usize, height: usize) -> Grid {
         Grid {
-            cells,
             width,
             height,
+            elements: vec![Element::Air; width * height],
         }
     }
-
-    fn get(&self, x: usize, y: usize) -> Element {
+    // Get the element at the given position
+    fn get(&self, x: usize, y: usize) -> Option<Element> {
         if x < self.width && y < self.height {
-            self.cells[y * self.width + x]
-        } else {
-            Element::Wall
+            return Some(self.elements[y * self.width + x]);
         }
+        None
     }
-
-    fn set(&mut self, x: usize, y: usize, element: Element) {
+    // Set the element at the given position
+    fn set(&mut self, x: usize, y: usize, value: Element) {
         if x < self.width && y < self.height {
-            self.cells[y * self.width + x] = element;
-        }
-    }
-
-    fn update(&mut self) {
-        // Iterate through each cell in the grid
-        for y in (0..self.height).rev() {
-            for x in 0..self.width {
-                match self.get(x, y) {
-                    Element::Sand => {
-                        if x < 1 || x >= self.width - 1 || y >= self.height - 1 {
-                            continue;
-                        }
-                        // If the cell below is empty, move sand down
-                        if self.get(x, y + 1) == Element::Empty {
-                            self.set(x, y + 1, Element::Sand);
-                            self.set(x, y, Element::Empty);
-                        } else if self.get(x - 1, y + 1) == Element::Empty {
-                            // If the cell below and to the left is empty, move sand diagonally left
-                            self.set(x - 1, y + 1, Element::Sand);
-                            self.set(x, y, Element::Empty);
-                        } else if self.get(x + 1, y + 1) == Element::Empty {
-                            // If the cell below and to the right is empty, move sand diagonally right
-                            self.set(x + 1, y + 1, Element::Sand);
-                            self.set(x, y, Element::Empty);
-                        } else if self.get(x, y - 1) == Element::Water {
-                            swap_elements(self, x, y, x, y - 1);
-                        } else if self.get(x - 1, y - 1) == Element::Water {
-                            swap_elements(self, x, y, x - 1, y - 1);
-                        } else if self.get(x + 1, y - 1) == Element::Water {
-                            swap_elements(self, x, y, x + 1, y - 1);
-                        }
-                    }
-                    Element::Water => {
-                        if x < 1 || x >= self.width - 1 || y >= self.height - 1 {
-                            continue;
-                        }
-
-                        // TODO: do this
-                    }
-                    _ => {}
-                }
-            }
+            self.elements[y * self.width + x] = value;
         }
     }
 }
 
-// Constants
-const CELL_SIZE: f32 = 5.0;
-const GRID_WIDTH: usize = 128;
-const GRID_HEIGHT: usize = 96;
-
-// Helper function to convert grid coordinates to screen coordinates
-fn grid_to_screen(x: usize, y: usize) -> Vec2 {
-    Vec2::new(x as f32 * CELL_SIZE, y as f32 * CELL_SIZE)
+fn window_conf() -> Conf {
+    Conf {
+        window_title: "Sandbox".to_owned(),
+        fullscreen: false,
+        window_resizable: false,
+        window_width: (GRID_WIDTH * CELL_SIZE as usize) as i32,
+        window_height: (GRID_HEIGHT * CELL_SIZE as usize) as i32,
+        ..Default::default()
+    }
 }
 
-fn swap_elements(grid: &mut Grid, x1: usize, y1: usize, x2: usize, y2: usize) {
-    let temp = grid.get(x1, y1);
-    grid.set(x1, y1, grid.get(x2, y2));
-    grid.set(x2, y2, temp);
+fn handle_input(grid: &mut Grid, selected_element: &mut Element) {
+    if is_key_pressed(KeyCode::Z) {
+        *selected_element = Element::Water;
+    }
+    if is_key_pressed(KeyCode::X) {
+        *selected_element = Element::Sand;
+    }
+    if is_key_pressed(KeyCode::C) {
+        *selected_element = Element::Wall;
+    }
+    if is_mouse_button_down(MouseButton::Left) {
+        grid.set(
+            (mouse_position().0 / CELL_SIZE) as usize,
+            (mouse_position().1 / CELL_SIZE) as usize,
+            *selected_element,
+        );
+    }
 }
-
-#[macroquad::main("Falling Sand Simulation")]
+#[macroquad::main(window_conf())]
 async fn main() {
-    // Initialize the game grid
     let mut grid = Grid::new(GRID_WIDTH, GRID_HEIGHT);
+    let mut selected_element = Element::Sand;
 
-    // Set up initial conditions
-    grid.set(GRID_WIDTH / 2, 0, Element::Sand);
-
+    // main game loop
     loop {
-        if is_key_down(KeyCode::Escape) {
-            break;
-        }
-        if is_mouse_button_down(MouseButton::Left) {
-            grid.set(
-                (mouse_position().0 / CELL_SIZE) as usize,
-                (mouse_position().1 / CELL_SIZE) as usize,
-                Element::Sand,
-            );
-        }
-        if is_key_down(KeyCode::G) {
-            grid.set(
-                (mouse_position().0 / CELL_SIZE) as usize,
-                (mouse_position().1 / CELL_SIZE) as usize,
-                Element::Water,
-            );
-        }
-        // Update the grid
-        grid.update();
+        clear_background(WHITE);
 
-        // Draw the elements on the screen
-        clear_background(BLACK);
+        handle_input(&mut grid, &mut selected_element);
+
+        // Draw the grid
         for y in 0..GRID_HEIGHT {
             for x in 0..GRID_WIDTH {
-                let color = match grid.get(x, y) {
-                    Element::Empty => BLACK,
-                    Element::Sand => YELLOW,
-                    Element::Water => BLUE,
-                    Element::Wall => RED,
-                };
-                draw_rectangle(
-                    grid_to_screen(x, y).x,
-                    grid_to_screen(x, y).y,
-                    CELL_SIZE,
-                    CELL_SIZE,
-                    color,
-                );
+                if grid.get(x, y) != None {
+                    draw_rectangle(
+                        x as f32 * CELL_SIZE,
+                        y as f32 * CELL_SIZE,
+                        CELL_SIZE,
+                        CELL_SIZE,
+                        // Note to self: unwrap() is used to get the value from the Option. It's like fromJust in Haskell.
+                        // Use only when you're sure the value is not None.
+                        match grid.get(x, y).unwrap() {
+                            Element::Air => WHITE,
+                            Element::Sand => GOLD,
+                            Element::Water => BLUE,
+                            Element::Wall => DARKGRAY,
+                        },
+                    );
+                }
             }
         }
 
