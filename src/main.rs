@@ -10,7 +10,8 @@ use grid::Grid;
     TODO:
     1. use traverse_line to draw smoother lines when drawing with the mouse
     2. add a way to clear the grid
-    3. fix sand behavior
+    3. fix sand behavior (it does the same thing that water used to do)
+        - It also doesn't displace the water properly
     4. add realism to elements
     5. multithreading?
 */

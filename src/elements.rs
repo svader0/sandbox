@@ -84,7 +84,7 @@ impl Element {
                 for i in 1..=dispersion_rate {
                     let new_x = (x as i32 + direction * i as i32) as usize;
 
-                    if new_x >= 0 && new_x < grid::GRID_WIDTH {
+                    if new_x < grid::GRID_WIDTH {
                         let target = grid.get((new_x, y));
 
                         if target == Element::Air {
