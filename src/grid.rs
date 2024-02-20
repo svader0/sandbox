@@ -45,11 +45,11 @@ impl Grid {
     }
 
     // Swap the elements at the given positions
-    pub fn swap_elements(&mut self, x1: usize, y1: usize, x2: usize, y2: usize) {
-        let element1 = self.get((x1, y1));
-        let element2 = self.get((x2, y2));
-        self.set((x1, y1), element2);
-        self.set((x2, y2), element1);
+    pub fn swap_elements(&mut self, pos: Vector2, new_pos: Vector2) {
+        let element1 = self.get(pos);
+        let element2 = self.get(new_pos);
+        self.set(pos, element2);
+        self.set(new_pos, element1);
     }
 
     // Update the grid
@@ -83,5 +83,8 @@ impl Grid {
             x += x_increment;
             y += y_increment;
         }
+    }
+    pub fn is_within_bounds(&self, pos: Vector2) -> bool {
+        pos.0 < self.width && pos.1 < self.height
     }
 }

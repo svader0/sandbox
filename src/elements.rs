@@ -1,3 +1,4 @@
+use ::rand::{thread_rng, Rng};
 use macroquad::prelude::*;
 
 use crate::grid::{self, Grid};
@@ -29,6 +30,10 @@ impl Element {
     }
 
     pub fn step(&self, grid: &mut Grid, x: usize, y: usize) {
+        if !grid.is_within_bounds((x, y)) {
+            return;
+        }
+
         match self {
             Element::Sand => self.step_sand(grid, x, y),
             Element::Water => self.step_liquid(grid, x, y, 5),
@@ -36,34 +41,31 @@ impl Element {
         }
     }
     pub fn step_sand(&self, grid: &mut Grid, x: usize, y: usize) {
-        // Check if the sand can fall down
-        // If it can, move the sand down
-        // Otherwise, check if the sand can move diagonally to the bottom left or right.
-        // Randomly choose to move to the left or right if both are possible.
-        // If the sand can't move diagonally, it will stay in place.
-        if y < grid::GRID_HEIGHT - 1 {
-            let below = grid.get((x, y + 1));
-            if below == Element::Air {
-                grid.move_element((x, y), (x, y + 1));
-            } else if below == Element::Water {
-                grid.swap_elements(x, y, x, y + 1);
-            } else if x > 0 && x < grid::GRID_WIDTH - 1 {
-                // Check if the sand can fall to the left or right
-                let left = grid.get((x - 1, y + 1));
-                let right = grid.get((x + 1, y + 1));
-                if left == Element::Air && right == Element::Air {
-                    let direction = rand::gen_range(0, 2);
-                    // Randomly choose to fall to the left or right
-                    if direction == 0 {
-                        grid.move_element((x, y), (x - 1, y + 1));
-                    } else {
-                        grid.move_element((x, y), (x + 1, y + 1));
-                    }
-                } else if left == Element::Air {
-                    grid.move_element((x, y), (x - 1, y + 1));
-                } else if right == Element::Air {
-                    grid.move_element((x, y), (x + 1, y + 1));
-                }
+        // Check if there is air below
+        if y + 1 < grid::GRID_HEIGHT && grid.get((x, y + 1)) == Element::Air {
+            // Fall down
+            grid.move_element((x, y), (x, y + 1));
+        } else if y + 1 < grid::GRID_HEIGHT && grid.get((x, y + 1)) == Element::Water {
+            // Swap with water below
+            grid.swap_elements((x, y), (x, y + 1));
+        } else {
+            let mut options = Vec::new();
+
+            if y + 1 < grid::GRID_HEIGHT && x > 0 && grid.get((x - 1, y + 1)) == Element::Air {
+                options.push((x - 1, y + 1));
+            }
+
+            if y + 1 < grid::GRID_HEIGHT
+                && x + 1 < grid::GRID_WIDTH
+                && grid.get((x + 1, y + 1)) == Element::Air
+            {
+                options.push((x + 1, y + 1));
+            }
+
+            if !options.is_empty() {
+                let random_index = thread_rng().gen_range(0..options.len());
+                let (new_x, new_y) = options[random_index];
+                grid.move_element((x, y), (new_x, new_y));
             }
         }
     }

@@ -17,7 +17,7 @@ use grid::Grid;
 */
 
 // Constants
-const CELL_SIZE: f32 = 5.0;
+const CELL_SIZE: f32 = 3.0;
 const BACKGROUND_COLOR: Color = BLACK;
 
 fn window_conf() -> Conf {
