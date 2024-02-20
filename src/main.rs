@@ -78,7 +78,7 @@ async fn main() {
 }
 
 fn handle_input(grid: &mut Grid, selected_element: &mut Element, brush_size: &mut usize) -> bool {
-    if is_key_pressed(KeyCode::B) {
+    if is_key_pressed(KeyCode::R) {
         grid.reset();
     }
     if is_key_pressed(KeyCode::Z) {
