@@ -78,6 +78,9 @@ async fn main() {
 }
 
 fn handle_input(grid: &mut Grid, selected_element: &mut Element, brush_size: &mut usize) -> bool {
+    if is_key_pressed(KeyCode::B) {
+        grid.reset();
+    }
     if is_key_pressed(KeyCode::Z) {
         *selected_element = Element::Water;
     }
@@ -86,6 +89,12 @@ fn handle_input(grid: &mut Grid, selected_element: &mut Element, brush_size: &mu
     }
     if is_key_pressed(KeyCode::C) {
         *selected_element = Element::Stone;
+    }
+    if is_key_pressed(KeyCode::V) {
+        *selected_element = Element::Air;
+    }
+    if is_key_pressed(KeyCode::B) {
+        *selected_element = Element::Faucet;
     }
     if is_mouse_button_down(MouseButton::Left) {
         let brush_offset = (*brush_size - 1) / 2;

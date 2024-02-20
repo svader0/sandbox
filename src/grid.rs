@@ -87,4 +87,8 @@ impl Grid {
     pub fn is_within_bounds(&self, pos: Vector2) -> bool {
         pos.0 < self.width && pos.1 < self.height
     }
+
+    pub fn reset(&mut self) {
+        self.elements = vec![Element::Air; self.width * self.height];
+    }
 }

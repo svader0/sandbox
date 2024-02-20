@@ -9,6 +9,7 @@ pub enum Element {
     Sand,
     Water,
     Stone,
+    Faucet,
 }
 
 impl Element {
@@ -18,6 +19,7 @@ impl Element {
             Element::Sand => "Sand",
             Element::Water => "Water",
             Element::Stone => "Stone",
+            Element::Faucet => "Faucet",
         }
     }
     pub fn get_color(&self) -> Option<Color> {
@@ -26,6 +28,7 @@ impl Element {
             Element::Sand => Some(GOLD),
             Element::Water => Some(BLUE),
             Element::Stone => Some(DARKGRAY),
+            Element::Faucet => Some(WHITE),
         }
     }
 
@@ -37,6 +40,7 @@ impl Element {
         match self {
             Element::Sand => self.step_sand(grid, x, y),
             Element::Water => self.step_liquid(grid, x, y, 5),
+            Element::Faucet => self.step_faucet(grid, x, y),
             _ => {}
         }
     }
@@ -96,6 +100,13 @@ impl Element {
                     }
                 }
             }
+        }
+    }
+
+    pub fn step_faucet(&self, grid: &mut Grid, x: usize, y: usize) {
+        // Check if there is air below
+        if y + 1 < grid::GRID_HEIGHT && grid.get((x, y + 1)) == Element::Air {
+            grid.set((x, y + 1), Element::Water);
         }
     }
 }
