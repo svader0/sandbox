@@ -73,6 +73,19 @@ async fn main() {
             }
         }
 
+        // Draw a box of size brush_size around the mouse
+        let brush_offset = (brush_size - 1) / 2;
+        let x_brush_box = (mouse_position().0 / CELL_SIZE) as isize - brush_offset as isize;
+        let y_brush_box = (mouse_position().1 / CELL_SIZE) as isize - brush_offset as isize;
+        draw_rectangle_lines(
+            x_brush_box as f32 * CELL_SIZE,
+            y_brush_box as f32 * CELL_SIZE,
+            brush_size as f32 * CELL_SIZE,
+            brush_size as f32 * CELL_SIZE,
+            2.0,
+            RED,
+        );
+
         next_frame().await
     }
 }
@@ -97,20 +110,10 @@ fn handle_input(grid: &mut Grid, selected_element: &mut Element, brush_size: &mu
         *selected_element = Element::Faucet;
     }
     if is_mouse_button_down(MouseButton::Left) {
-        let brush_offset = (*brush_size - 1) / 2;
-        for i in 0..*brush_size {
-            for j in 0..*brush_size {
-                let x =
-                    (mouse_position().0 / CELL_SIZE) as isize + i as isize - brush_offset as isize;
-                let y =
-                    (mouse_position().1 / CELL_SIZE) as isize + j as isize - brush_offset as isize;
-                if x >= 0 && y >= 0 {
-                    let x = x as usize;
-                    let y = y as usize;
-                    grid.set((x, y), *selected_element);
-                }
-            }
-        }
+        place_element(grid, selected_element, brush_size);
+    }
+    if is_mouse_button_down(MouseButton::Right) {
+        place_element(grid, &mut Element::Air, brush_size);
     }
     if is_key_pressed(KeyCode::LeftBracket) {
         *brush_size = (*brush_size).saturating_sub(1);
@@ -124,4 +127,19 @@ fn handle_input(grid: &mut Grid, selected_element: &mut Element, brush_size: &mu
     }
 
     true
+}
+
+fn place_element(grid: &mut Grid, selected_element: &mut Element, brush_size: &mut usize) {
+    let brush_offset = (*brush_size - 1) / 2;
+    for i in 0..*brush_size {
+        for j in 0..*brush_size {
+            let x = (mouse_position().0 / CELL_SIZE) as isize + i as isize - brush_offset as isize;
+            let y = (mouse_position().1 / CELL_SIZE) as isize + j as isize - brush_offset as isize;
+            if x >= 0 && y >= 0 {
+                let x = x as usize;
+                let y = y as usize;
+                grid.set((x, y), *selected_element);
+            }
+        }
+    }
 }
