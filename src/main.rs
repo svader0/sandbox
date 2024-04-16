@@ -2,7 +2,7 @@ use macroquad::prelude::*;
 
 pub mod elements;
 pub mod grid;
-
+pub mod element_type;
 use elements::Element;
 use grid::Grid;
 
@@ -109,6 +109,10 @@ fn handle_input(grid: &mut Grid, selected_element: &mut Element, brush_size: &mu
     if is_key_pressed(KeyCode::B) {
         *selected_element = Element::Faucet;
     }
+    if is_key_pressed(KeyCode::L) {
+        *selected_element = Element::Clay;
+    }
+
     if is_mouse_button_down(MouseButton::Left) {
         place_element(grid, selected_element, brush_size);
     }
