@@ -18,7 +18,7 @@ impl Grid {
         Grid {
             width,
             height,
-            elements: vec![Element::Air; width * height],
+            elements: vec![Element::Nothing; width * height],
         }
     }
     // Get the element at the given position
@@ -28,7 +28,7 @@ impl Grid {
         if pos.0 < self.width && pos.1 < self.height {
             return self.elements[pos.1 * self.width + pos.0];
         }
-        Element::Air
+        Element::Nothing
     }
     // Set the element at the given position
     pub fn set(&mut self, pos: Vector2, value: Element) {
@@ -40,7 +40,7 @@ impl Grid {
     // Move the element at the given position to the new position
     pub fn move_element(&mut self, pos: Vector2, new_pos: Vector2) {
         let element = self.get(pos);
-        self.set(pos, Element::Air);
+        self.set(pos, Element::Nothing);
         self.set(new_pos, element);
     }
 
@@ -89,6 +89,8 @@ impl Grid {
     }
 
     pub fn reset(&mut self) {
-        self.elements = vec![Element::Air; self.width * self.height];
+        self.elements = vec![Element::Nothing; self.width * self.height];
     }
+
+
 }
