@@ -1,5 +1,5 @@
 use crate::elements::Element;
-use crate::grid::{self, Grid};
+use crate::grid::Grid;
 
 use macroquad::prelude::*;
 use ::rand::{thread_rng, Rng};
@@ -14,7 +14,7 @@ pub enum ElementType {
 
 
 
-pub fn step_moveable_solid(element: &Element, grid: &mut Grid, x: usize, y: usize) {
+pub fn step_moveable_solid(grid: &mut Grid, x: usize, y: usize) {
     // Check if there is air below
     if y + 1 < grid.height && grid.get((x, y + 1)) == Element::Nothing {
         // Fall down
@@ -44,12 +44,12 @@ pub fn step_moveable_solid(element: &Element, grid: &mut Grid, x: usize, y: usiz
     }
 }
 
-pub fn step_immoveable_solid(element: &Element, grid: &mut Grid, x: usize, y: usize) {
+pub fn step_immoveable_solid(grid: &mut Grid, x: usize, y: usize) {
     if y + 1 < grid.height && grid.get((x, y + 1)) == Element::Water {
         grid.swap_elements((x, y), (x, y + 1));
     }
 }
-pub fn step_liquid(element: &Element, grid: &mut Grid, x: usize, y: usize, dispersion_rate: usize) {
+pub fn step_liquid(grid: &mut Grid, x: usize, y: usize, dispersion_rate: usize) {
     // Check if the water can fall down
     // If it can, move the water down
     // Otherwise, attempt to disperse left or right
@@ -78,7 +78,7 @@ pub fn step_liquid(element: &Element, grid: &mut Grid, x: usize, y: usize, dispe
     }
 }
 
-pub fn step_pixel_generator(element: &Element, grid: &mut Grid, x: usize, y: usize) {
+pub fn step_pixel_generator(grid: &mut Grid, x: usize, y: usize) {
     // Check if there is air below
     if y + 1 < grid.height && grid.get((x, y + 1)) == Element::Nothing {
         grid.set((x, y + 1), Element::Water);

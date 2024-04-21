@@ -22,14 +22,14 @@ const BACKGROUND_COLOR: Color = BLACK;
 fn window_conf() -> Conf {
     Conf {
         window_title: "Sandbox".to_owned(),
-        fullscreen: true,
+        fullscreen: false,
         ..Default::default()
     }
 }
 
 #[macroquad::main(window_conf())]
 async fn main() {
-    let mut grid = Grid::new(226,126, ((screen_height() * 0.01) / 126.0));
+    let mut grid = Grid::new(screen_height());
     let mut selected_element = Element::Sand;
     let mut brush_size = 1;
 
@@ -62,33 +62,27 @@ async fn main() {
         String::from("L: clay")); 
 
     // Define brush size controls
-    control_manager.add_brush_control(KeyCode::LeftBracket, |size| size.saturating_sub(1), String::from("[: brush-1"));
-    control_manager.add_brush_control(KeyCode::RightBracket, |size| size.saturating_add(1), String::from("]: brush+1"));
+    control_manager.add_brush_control(KeyCode::LeftBracket, |size| size-1, String::from("[: brush-1"));
+    control_manager.add_brush_control(KeyCode::RightBracket, |size| size+1, String::from("]: brush+1"));
     
 
 
     // main game loop
     loop {
         grid.update();
-
-
-        if (grid.width != screen_width().round() as usize || screen_height().round() as usize != grid.height){ //change in window
-            grid.cell_size = (screen_height() * 0.8) as f32 / 126.0;
+        if grid.width != screen_width().round() as usize || screen_height().round() as usize != grid.height{ //change in window
+            grid.update_cell_size(screen_height());
         }
 
+        //inputs
         if is_key_pressed(KeyCode::R) { //put here so it has access to grid. Temp?
             grid.reset();
         }
-
         clear_background(BACKGROUND_COLOR);
         if !control_manager.handle_input(&mut selected_element,&mut brush_size) {
             break; // Escape was pressed
         }
-        handle_mouse_input(&mut grid, &mut selected_element, &mut brush_size);
-        // if !handle_input(&mut grid, &mut selected_element, &mut brush_size) {
-        //     break;
-        // }
-
+        handle_mouse_input(&mut grid, &selected_element, &brush_size);
         // Draw text
         let top_of_text = (screen_height()*0.9).round();
         let framerate: String = String::from("fps: ") + &get_fps().to_string();
@@ -100,6 +94,7 @@ async fn main() {
         draw_text(&brush_size_text, 10.0, top_of_text + 80.0, 30.0, WHITE);
         draw_text(&control_manager.controls_string(), 10.0, (screen_height()*0.9).round(), 30.0, WHITE);
 
+        //render grid
         for y in 0..screen_height()as usize-20 {
             for x in 0..screen_width()as usize-20 {
                 let cell = grid.get((x, y));
@@ -158,9 +153,15 @@ struct Control {
     description: String,
 }
 
+struct BrushControl {
+    key: KeyCode,
+    action: fn(usize)->usize,
+    description: String
+}
+
 struct ControlManager {
     controls: Vec<Control>,
-    brush_size_controls: Vec<(KeyCode, fn(usize) -> usize, String)>,
+    brush_size_controls: Vec<BrushControl>,
 }
 
 impl ControlManager {
@@ -175,8 +176,8 @@ impl ControlManager {
         self.controls.push(Control { key, action, description });
     }
 
-    fn add_brush_control(&mut self, key: KeyCode, func: fn(usize) -> usize, description: String) {
-        self.brush_size_controls.push((key, func, description));
+    fn add_brush_control(&mut self, key: KeyCode, action: fn(usize) -> usize, description: String) {
+        self.brush_size_controls.push(BrushControl{key, action, description});
     }
 
     fn handle_input(&self, selected_element: &mut Element, brush_size: &mut usize) -> bool {
@@ -186,9 +187,9 @@ impl ControlManager {
             }
         }
 
-        for &(key, func, ref _description) in &self.brush_size_controls {
-            if is_key_pressed(key) {
-                *brush_size = func(*brush_size);
+        for b_control in &self.brush_size_controls {
+            if is_key_pressed(b_control.key) {
+                *brush_size = (b_control.action)(*brush_size);
             }
         }
 
@@ -206,11 +207,8 @@ impl ControlManager {
             result += &control.description.to_string();
             result += "\n"
         }
-        // for control in &self.controls {
-        //     result += &format!("Key: {:?}, Action: {}\n", control.key, control.description);
-        // }
-        for &(key, _, ref desc) in &self.brush_size_controls {
-            result += desc;
+        for bc in &self.brush_size_controls {
+            result += &bc.description;
         }
 
         //manually added controls
@@ -224,6 +222,6 @@ fn handle_mouse_input(grid: &mut Grid, selected_element: &Element, brush_size: &
         place_element(grid, &mut selected_element.clone(), &mut brush_size.clone());
     }
     if is_mouse_button_down(MouseButton::Right) {
-        place_element(grid, &mut Element::Air, &mut brush_size.clone());
+        place_element(grid, &mut Element::Nothing, &mut brush_size.clone());
     }
 }

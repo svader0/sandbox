@@ -1,7 +1,6 @@
-use ::rand::{thread_rng, Rng};
 use macroquad::prelude::*;
 
-use crate::grid::{self, Grid};
+use crate::grid::Grid;
 use crate::element_type::{ElementType, step_immoveable_solid, step_moveable_solid, step_liquid, step_pixel_generator};
 
 
@@ -59,11 +58,11 @@ impl Element {
         
         let element_type = self.get_element_type();
         match element_type {
-            ElementType::ImmovableSolid => step_immoveable_solid(&self, grid, x, y),
-            ElementType::MoveableSolid=> step_moveable_solid(&self, grid, x, y),
-            ElementType::Liquid => step_liquid(&self, grid, x, y, 1),
-            ElementType::Gas => step_liquid(&self, grid, x, y, 1),
-            ElementType::PixelGenerator => step_pixel_generator(&self, grid, x, y),
+            ElementType::ImmovableSolid => step_immoveable_solid(grid, x, y),
+            ElementType::MoveableSolid=> step_moveable_solid(grid, x, y),
+            ElementType::Liquid => step_liquid(grid, x, y, 1),
+            ElementType::Gas => step_liquid(grid, x, y, 1),
+            ElementType::PixelGenerator => step_pixel_generator(grid, x, y),
             _ => {}
         }
     }
