@@ -7,17 +7,19 @@ pub const GRID_HEIGHT: usize = 126;
 pub type Vector2 = (usize, usize);
 
 pub struct Grid {
-    width: usize,
-    height: usize,
+    pub width: usize,
+    pub height: usize,
+    pub cell_size: f32,
     elements: Vec<Element>,
 }
 
 impl Grid {
     // Create a new grid with the given width and height
-    pub fn new(width: usize, height: usize) -> Grid {
+    pub fn new(width: usize, height: usize, cell_size: f32) -> Grid {
         Grid {
             width,
             height,
+            cell_size,
             elements: vec![Element::Nothing; width * height],
         }
     }

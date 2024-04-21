@@ -16,21 +16,21 @@ pub enum ElementType {
 
 pub fn step_moveable_solid(element: &Element, grid: &mut Grid, x: usize, y: usize) {
     // Check if there is air below
-    if y + 1 < grid::GRID_HEIGHT && grid.get((x, y + 1)) == Element::Nothing {
+    if y + 1 < grid.height && grid.get((x, y + 1)) == Element::Nothing {
         // Fall down
         grid.move_element((x, y), (x, y + 1));
-    } else if y + 1 < grid::GRID_HEIGHT && grid.get((x, y + 1)) == Element::Water {
+    } else if y + 1 < grid.height && grid.get((x, y + 1)) == Element::Water {
         // Swap with water below
         grid.swap_elements((x, y), (x, y + 1));
     } else {
         let mut options = Vec::new();
 
-        if y + 1 < grid::GRID_HEIGHT && x > 0 && grid.get((x - 1, y + 1)) == Element::Nothing {
+        if y + 1 < grid.height && x > 0 && grid.get((x - 1, y + 1)) == Element::Nothing {
             options.push((x - 1, y + 1));
         }
 
-        if y + 1 < grid::GRID_HEIGHT
-            && x + 1 < grid::GRID_WIDTH
+        if y + 1 < grid.height
+            && x + 1 < grid.width
             && grid.get((x + 1, y + 1)) == Element::Nothing
         {
             options.push((x + 1, y + 1));
@@ -45,7 +45,7 @@ pub fn step_moveable_solid(element: &Element, grid: &mut Grid, x: usize, y: usiz
 }
 
 pub fn step_immoveable_solid(element: &Element, grid: &mut Grid, x: usize, y: usize) {
-    if y + 1 < grid::GRID_HEIGHT && grid.get((x, y + 1)) == Element::Water {
+    if y + 1 < grid.height && grid.get((x, y + 1)) == Element::Water {
         grid.swap_elements((x, y), (x, y + 1));
     }
 }
@@ -53,7 +53,7 @@ pub fn step_liquid(element: &Element, grid: &mut Grid, x: usize, y: usize, dispe
     // Check if the water can fall down
     // If it can, move the water down
     // Otherwise, attempt to disperse left or right
-    if y < grid::GRID_HEIGHT - 1 {
+    if y < grid.height - 1 {
         let below = grid.get((x, y + 1));
         if below == Element::Nothing {
             grid.move_element((x, y), (x, y + 1));
@@ -65,7 +65,7 @@ pub fn step_liquid(element: &Element, grid: &mut Grid, x: usize, y: usize, dispe
             for i in 1..=dispersion_rate {
                 let new_x = (x as i32 + direction * i as i32) as usize;
 
-                if new_x < grid::GRID_WIDTH {
+                if new_x < grid.width {
                     let target = grid.get((new_x, y));
 
                     if target == Element::Nothing {
@@ -80,7 +80,7 @@ pub fn step_liquid(element: &Element, grid: &mut Grid, x: usize, y: usize, dispe
 
 pub fn step_pixel_generator(element: &Element, grid: &mut Grid, x: usize, y: usize) {
     // Check if there is air below
-    if y + 1 < grid::GRID_HEIGHT && grid.get((x, y + 1)) == Element::Nothing {
+    if y + 1 < grid.height && grid.get((x, y + 1)) == Element::Nothing {
         grid.set((x, y + 1), Element::Water);
     }
 }

@@ -17,23 +17,19 @@ use grid::Grid;
 */
 
 // Constants
-const CELL_SIZE: f32 = 3.0;
 const BACKGROUND_COLOR: Color = BLACK;
 
 fn window_conf() -> Conf {
     Conf {
         window_title: "Sandbox".to_owned(),
-        fullscreen: false,
-        window_resizable: false,
-        window_width: (grid::GRID_WIDTH * CELL_SIZE as usize) as i32,
-        window_height: (grid::GRID_HEIGHT * CELL_SIZE as usize) as i32,
+        fullscreen: true,
         ..Default::default()
     }
 }
 
 #[macroquad::main(window_conf())]
 async fn main() {
-    let mut grid = Grid::new(grid::GRID_WIDTH, grid::GRID_HEIGHT);
+    let mut grid = Grid::new(226,126, ((screen_height() * 0.01) / 126.0));
     let mut selected_element = Element::Sand;
     let mut brush_size = 1;
 
@@ -67,13 +63,18 @@ async fn main() {
 
     // Define brush size controls
     control_manager.add_brush_control(KeyCode::LeftBracket, |size| size.saturating_sub(1), String::from("[: brush-1"));
-    control_manager.add_brush_control(KeyCode::RightBracket, |size| size.saturating_add(1), String::from("[: brush+1"));
+    control_manager.add_brush_control(KeyCode::RightBracket, |size| size.saturating_add(1), String::from("]: brush+1"));
     
 
 
     // main game loop
     loop {
         grid.update();
+
+
+        if (grid.width != screen_width().round() as usize || screen_height().round() as usize != grid.height){ //change in window
+            grid.cell_size = (screen_height() * 0.8) as f32 / 126.0;
+        }
 
         if is_key_pressed(KeyCode::R) { //put here so it has access to grid. Temp?
             grid.reset();
@@ -89,18 +90,18 @@ async fn main() {
         // }
 
         // Draw text
+        let top_of_text = (screen_height()*0.9).round();
         let framerate: String = String::from("fps: ") + &get_fps().to_string();
-        draw_text(&framerate, 10.0, 20.0, 30.0, WHITE);
-        let controls: String = control_manager.controls_string();
-        draw_text(&controls, 10.0, 100.0, 30.0, WHITE);
+        draw_text(&framerate, 10.0, top_of_text + 20.0, 30.0, WHITE);
         let selected_element_text =
             String::from("Selected element: ") + selected_element.to_string();
-        draw_text(&selected_element_text, 10.0, 50.0, 30.0, WHITE);
+        draw_text(&selected_element_text, 10.0, top_of_text + 50.0, 30.0, WHITE);
         let brush_size_text = String::from("Brush size: ") + &brush_size.to_string();
-        draw_text(&brush_size_text, 10.0, 80.0, 30.0, WHITE);
+        draw_text(&brush_size_text, 10.0, top_of_text + 80.0, 30.0, WHITE);
+        draw_text(&control_manager.controls_string(), 10.0, (screen_height()*0.9).round(), 30.0, WHITE);
 
-        for y in 0..grid::GRID_HEIGHT {
-            for x in 0..grid::GRID_WIDTH {
+        for y in 0..screen_height()as usize-20 {
+            for x in 0..screen_width()as usize-20 {
                 let cell = grid.get((x, y));
                 let color = match cell.get_color() {
                     Some(color) => color,
@@ -108,10 +109,10 @@ async fn main() {
                 };
                 // Draw the grid
                 draw_rectangle(
-                    x as f32 * CELL_SIZE,
-                    y as f32 * CELL_SIZE,
-                    CELL_SIZE,
-                    CELL_SIZE,
+                    x as f32 * grid.cell_size,
+                    y as f32 * grid.cell_size,
+                    grid.cell_size,
+                    grid.cell_size,
                     color,
                 );
             }
@@ -119,13 +120,13 @@ async fn main() {
 
         // Draw a box of size brush_size around the mouse
         let brush_offset = (brush_size - 1) / 2;
-        let x_brush_box = (mouse_position().0 / CELL_SIZE) as isize - brush_offset as isize;
-        let y_brush_box = (mouse_position().1 / CELL_SIZE) as isize - brush_offset as isize;
+        let x_brush_box = (mouse_position().0 / grid.cell_size) as isize - brush_offset as isize;
+        let y_brush_box = (mouse_position().1 / grid.cell_size) as isize - brush_offset as isize;
         draw_rectangle_lines(
-            x_brush_box as f32 * CELL_SIZE,
-            y_brush_box as f32 * CELL_SIZE,
-            brush_size as f32 * CELL_SIZE,
-            brush_size as f32 * CELL_SIZE,
+            x_brush_box as f32 * grid.cell_size,
+            y_brush_box as f32 * grid.cell_size,
+            brush_size as f32 * grid.cell_size,
+            brush_size as f32 * grid.cell_size,
             2.0,
             RED,
         );
@@ -140,8 +141,8 @@ fn place_element(grid: &mut Grid, selected_element: &mut Element, brush_size: &m
     let brush_offset = (*brush_size - 1) / 2;
     for i in 0..*brush_size {
         for j in 0..*brush_size {
-            let x = (mouse_position().0 / CELL_SIZE) as isize + i as isize - brush_offset as isize;
-            let y = (mouse_position().1 / CELL_SIZE) as isize + j as isize - brush_offset as isize;
+            let x = (mouse_position().0 / grid.cell_size) as isize + i as isize - brush_offset as isize;
+            let y = (mouse_position().1 / grid.cell_size) as isize + j as isize - brush_offset as isize;
             if x >= 0 && y >= 0 {
                 let x = x as usize;
                 let y = y as usize;
@@ -203,7 +204,7 @@ impl ControlManager {
         let mut result = String::from("Controls:\n");
         for control in &self.controls {
             result += &control.description.to_string();
-            result += " "
+            result += "\n"
         }
         // for control in &self.controls {
         //     result += &format!("Key: {:?}, Action: {}\n", control.key, control.description);
