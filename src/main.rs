@@ -3,7 +3,7 @@ use macroquad::prelude::*;
 pub mod elements;
 pub mod grid;
 pub mod element_type;
-use elements::Element;
+use elements::{Element, AIR, SAND, WATER, STONE, FAUCET, CLAY};
 use grid::Grid;
 
 /*
@@ -34,7 +34,7 @@ fn window_conf() -> Conf {
 #[macroquad::main(window_conf())]
 async fn main() {
     let mut grid = Grid::new(grid::GRID_WIDTH, grid::GRID_HEIGHT);
-    let mut selected_element = Element::Sand;
+    let mut selected_element = SAND;
     let mut brush_size = 1;
 
     // main game loop
@@ -94,30 +94,31 @@ fn handle_input(grid: &mut Grid, selected_element: &mut Element, brush_size: &mu
     if is_key_pressed(KeyCode::R) {
         grid.reset();
     }
+
     if is_key_pressed(KeyCode::Z) {
-        *selected_element = Element::Water;
+        *selected_element = WATER;
     }
     if is_key_pressed(KeyCode::X) {
-        *selected_element = Element::Sand;
+        *selected_element = SAND;
     }
     if is_key_pressed(KeyCode::C) {
-        *selected_element = Element::Stone;
+        *selected_element = STONE;
     }
     if is_key_pressed(KeyCode::V) {
-        *selected_element = Element::Air;
+        *selected_element = AIR;
     }
     if is_key_pressed(KeyCode::B) {
-        *selected_element = Element::Faucet;
+        *selected_element = FAUCET;
     }
     if is_key_pressed(KeyCode::L) {
-        *selected_element = Element::Clay;
+        *selected_element = CLAY;
     }
 
     if is_mouse_button_down(MouseButton::Left) {
         place_element(grid, selected_element, brush_size);
     }
     if is_mouse_button_down(MouseButton::Right) {
-        place_element(grid, &mut Element::Air, brush_size);
+        place_element(grid, &AIR, brush_size);
     }
     if is_key_pressed(KeyCode::LeftBracket) {
         *brush_size = (*brush_size).saturating_sub(1);
@@ -133,7 +134,7 @@ fn handle_input(grid: &mut Grid, selected_element: &mut Element, brush_size: &mu
     true
 }
 
-fn place_element(grid: &mut Grid, selected_element: &mut Element, brush_size: &mut usize) {
+fn place_element(grid: &mut Grid, selected_element: &Element, brush_size: &mut usize) {
     let brush_offset = (*brush_size - 1) / 2;
     for i in 0..*brush_size {
         for j in 0..*brush_size {
