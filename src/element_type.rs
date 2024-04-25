@@ -82,7 +82,7 @@ pub fn step_gas(grid: &mut Grid, x: usize, y: usize, diffusion_rate: usize) {
 // 1. The water has a weird tendency to flow left.
 // 2. We generate a new random number every single time instead of just using a preexisting pseudo-random number, like the
 //      frame count.
-// 3. The dispersion rate doesn't really do anything and is buggy AF.
+// 3. The dispersion rate is buggy asf but does finally work.
 pub fn step_liquid(grid: &mut Grid, x: usize, y: usize, dispersion_rate: usize) {
     // Check if the water can fall down
     // If it can, move the water down

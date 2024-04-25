@@ -1,9 +1,10 @@
-
 use macroquad::prelude::*;
 
+use crate::element_type::{
+    step_gas, step_immoveable_solid, step_liquid, step_moveable_solid, step_pixel_generator,
+    ElementType,
+};
 use crate::grid::Grid;
-use crate::element_type::{step_gas, step_immoveable_solid, step_liquid, step_moveable_solid, step_pixel_generator, ElementType};
-
 
 #[derive(Clone, Copy, PartialEq)]
 
@@ -21,8 +22,8 @@ impl Element {
         match self.element_type {
             ElementType::ImmovableSolid => step_immoveable_solid(grid, x, y),
             ElementType::MoveableSolid => step_moveable_solid(grid, x, y),
-            ElementType::Liquid => step_liquid( grid, x, y, 1),
-            ElementType::Gas => step_gas( grid, x, y, 1),
+            ElementType::Liquid => step_liquid(grid, x, y, 4),
+            ElementType::Gas => step_gas(grid, x, y, 1),
             ElementType::PixelGenerator => step_pixel_generator(grid, x, y),
             _ => {}
         }
@@ -37,7 +38,6 @@ impl Element {
     pub fn get_element_type(&self) -> ElementType {
         return self.element_type;
     }
-
 }
 
 pub static AIR: Element = Element {
@@ -81,4 +81,3 @@ pub static NOTHING: Element = Element {
     color: None,
     name: "Nothing",
 };
-
