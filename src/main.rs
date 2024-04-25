@@ -3,7 +3,7 @@ use macroquad::prelude::*;
 pub mod elements;
 pub mod grid;
 pub mod element_type;
-use elements::Element;
+use elements::{Element, AIR, SAND, WATER, STONE, FAUCET, CLAY, NOTHING};
 use grid::Grid;
 
 /*
@@ -30,7 +30,7 @@ fn window_conf() -> Conf {
 #[macroquad::main(window_conf())]
 async fn main() {
     let mut grid = Grid::new(screen_height());
-    let mut selected_element = Element::Sand;
+    let mut selected_element = SAND;
     let mut brush_size = 1;
 
 
@@ -38,27 +38,27 @@ async fn main() {
 
     control_manager.add_control(
         KeyCode::Z, 
-        Box::new(|elem| *elem = Element::Water),
+        Box::new(|elem| *elem = WATER),
         String::from("Z: water"));
     control_manager.add_control(
         KeyCode::X,
-        Box::new(|elem| *elem = Element::Sand),
+        Box::new(|elem| *elem = SAND),
         String::from("X: sand"));
     control_manager.add_control(
         KeyCode::C, 
-        Box::new(|elem| *elem = Element::Stone),
+        Box::new(|elem| *elem = STONE),
         String::from("C: stone"));
     control_manager.add_control(
         KeyCode::V, 
-        Box::new(|elem| *elem = Element::Air),
+        Box::new(|elem| *elem = AIR),
         String::from("V: air"));    
     control_manager.add_control(
         KeyCode::B, 
-        Box::new(|elem| *elem = Element::Faucet),
+        Box::new(|elem| *elem = FAUCET),
         String::from("B: faucet")); 
     control_manager.add_control(
         KeyCode::L, 
-        Box::new(|elem| *elem = Element::Clay),
+        Box::new(|elem| *elem = CLAY),
         String::from("L: clay")); 
 
     // Define brush size controls
@@ -131,8 +131,7 @@ async fn main() {
 }
 
 
-
-fn place_element(grid: &mut Grid, selected_element: &mut Element, brush_size: &mut usize) {
+fn place_element(grid: &mut Grid, selected_element: &Element, brush_size: &mut usize) {
     let brush_offset = (*brush_size - 1) / 2;
     for i in 0..*brush_size {
         for j in 0..*brush_size {
@@ -222,6 +221,6 @@ fn handle_mouse_input(grid: &mut Grid, selected_element: &Element, brush_size: &
         place_element(grid, &mut selected_element.clone(), &mut brush_size.clone());
     }
     if is_mouse_button_down(MouseButton::Right) {
-        place_element(grid, &mut Element::Nothing, &mut brush_size.clone());
+        place_element(grid, &NOTHING, &mut brush_size.clone());
     }
 }

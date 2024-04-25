@@ -1,4 +1,4 @@
-use crate::elements::Element;
+use crate::elements::{Element, NOTHING};
 
 // constants
 const GRID_WIDTH: usize = 300;
@@ -30,7 +30,7 @@ impl Grid {
         if pos.0 < self.width && pos.1 < self.height {
             return self.elements[pos.1 * self.width + pos.0];
         }
-        Element::Nothing
+        NOTHING
     }
     // Set the element at the given position
     pub fn set(&mut self, pos: Vector2, value: Element) {
@@ -42,7 +42,7 @@ impl Grid {
     // Move the element at the given position to the new position
     pub fn move_element(&mut self, pos: Vector2, new_pos: Vector2) {
         let element = self.get(pos);
-        self.set(pos, Element::Nothing);
+        self.set(pos, NOTHING);
         self.set(new_pos, element);
     }
 
@@ -95,7 +95,7 @@ impl Grid {
     }
 
     pub fn reset(&mut self) {
-        self.elements = vec![Element::Nothing; self.width * self.height];
+        self.elements = vec![NOTHING; self.width * self.height];
     }
 
 
