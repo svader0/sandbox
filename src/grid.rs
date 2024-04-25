@@ -20,7 +20,7 @@ impl Grid {
             width: GRID_WIDTH,
             height: GRID_HEIGHT,
             cell_size: screen_height * 0.8 / GRID_HEIGHT as f32,
-            elements: vec![Element::Nothing; GRID_WIDTH * GRID_HEIGHT],
+            elements: vec![NOTHING; GRID_WIDTH * GRID_HEIGHT],
         }
     }
     // Get the element at the given position

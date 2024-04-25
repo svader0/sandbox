@@ -1,7 +1,7 @@
 use macroquad::prelude::*;
 
 use crate::grid::Grid;
-use crate::element_type::{ElementType, step_immoveable_solid, step_moveable_solid, step_liquid, step_pixel_generator};
+use crate::element_type::{ElementType, step_immoveable_solid, step_moveable_solid, step_liquid, step_pixel_generator, step_gas};
 
 
 #[derive(Clone, Copy, PartialEq)]
