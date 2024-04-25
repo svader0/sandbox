@@ -1,24 +1,26 @@
 use crate::elements::{Element, NOTHING};
 
 // constants
-pub const GRID_WIDTH: usize = 226;
-pub const GRID_HEIGHT: usize = 126;
+const GRID_WIDTH: usize = 244;
+const GRID_HEIGHT: usize = 122;
 
 pub type Vector2 = (usize, usize);
 
 pub struct Grid {
-    width: usize,
-    height: usize,
+    pub width: usize,
+    pub height: usize,
+    pub cell_size: f32,
     elements: Vec<Element>,
 }
 
 impl Grid {
     // Create a new grid with the given width and height
-    pub fn new(width: usize, height: usize) -> Grid {
+    pub fn new(screen_height: f32) -> Grid {
         Grid {
-            width,
-            height,
-            elements: vec![NOTHING; width * height],
+            width: GRID_WIDTH,
+            height: GRID_HEIGHT,
+            cell_size: screen_height * 0.8 / GRID_HEIGHT as f32,
+            elements: vec![NOTHING; GRID_WIDTH * GRID_HEIGHT],
         }
     }
     // Get the element at the given position
@@ -60,6 +62,10 @@ impl Grid {
                 element.step(self, x, y);
             }
         }
+    }
+    
+    pub fn update_cell_size(&mut self, screen_height: f32) {
+        self.cell_size = screen_height * 0.8 / GRID_HEIGHT as f32;
     }
 
     // Apply the function to each element in between two positions
