@@ -1,7 +1,7 @@
 use crate::elements::{Element, NOTHING};
 
 // constants
-const GRID_WIDTH: usize = 244;
+const GRID_WIDTH: usize = 180;
 const GRID_HEIGHT: usize = 122;
 
 pub type Vector2 = (usize, usize);
