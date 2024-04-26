@@ -1,8 +1,8 @@
 use crate::elements::{Element, NOTHING};
 
 // constants
-const GRID_WIDTH: usize = 180;
-const GRID_HEIGHT: usize = 122;
+const GRID_WIDTH: usize = 300;
+const GRID_HEIGHT: usize = 200;
 
 pub type Vector2 = (usize, usize);
 
@@ -63,12 +63,13 @@ impl Grid {
             }
         }
     }
-    
+
     pub fn update_cell_size(&mut self, screen_height: f32) {
         self.cell_size = screen_height * 0.8 / GRID_HEIGHT as f32;
     }
 
     // Apply the function to each element in between two positions
+    // see https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
     pub fn traverse_line<F>(&mut self, start: Vector2, end: Vector2, mut f: F)
     where
         F: FnMut(usize, usize),
@@ -97,6 +98,4 @@ impl Grid {
     pub fn reset(&mut self) {
         self.elements = vec![NOTHING; self.width * self.height];
     }
-
-
 }

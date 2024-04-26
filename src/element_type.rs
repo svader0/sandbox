@@ -1,7 +1,7 @@
-use macroquad::prelude::*;
-use crate::elements::{NOTHING, WATER};
+use crate::elements::{Element, AIR, MAZE, NOTHING, WATER};
 use crate::grid::Grid;
 use ::rand::{thread_rng, Rng};
+use macroquad::prelude::*;
 #[derive(Clone, Copy, PartialEq)]
 
 pub enum ElementType {
@@ -10,10 +10,9 @@ pub enum ElementType {
     Liquid,
     Gas,
     PixelGenerator,
+    Maze,
     Nothing,
 }
-
-
 
 pub fn step_moveable_solid(grid: &mut Grid, x: usize, y: usize) {
     // Check if there is air below
@@ -30,10 +29,7 @@ pub fn step_moveable_solid(grid: &mut Grid, x: usize, y: usize) {
             options.push((x - 1, y + 1));
         }
 
-        if y + 1 < grid.height
-            && x + 1 < grid.width
-            && grid.get((x + 1, y + 1)) == NOTHING
-        {
+        if y + 1 < grid.height && x + 1 < grid.width && grid.get((x + 1, y + 1)) == NOTHING {
             options.push((x + 1, y + 1));
         }
 
@@ -80,7 +76,6 @@ pub fn step_gas(grid: &mut Grid, x: usize, y: usize, diffusion_rate: usize) {
 }
 
 // This implementation looks pretty good, but is very poor for a couple reasons.
-// 1. The water has a weird tendency to flow left.
 // 2. We generate a new random number every single time instead of just using a preexisting pseudo-random number, like the
 //      frame count.
 // 3. The dispersion rate is buggy asf but does finally work.
@@ -117,5 +112,98 @@ pub fn step_pixel_generator(grid: &mut Grid, x: usize, y: usize) {
     // Check if there is air below
     if y + 1 < grid.height && grid.get((x, y + 1)) == NOTHING {
         grid.set((x, y + 1), WATER);
+    }
+}
+
+// Maze is a Life-like cellular automaton in which cells survive from one generation to the next if they have at least 1 and at most 5 neighbours. Cells are born if they have exactly 3 neighbours. This resembles Conway's Game of Life in some ways, but it is rather more difficult for cells to die off, and random starting patterns tend to evolve into complex growing maze-like structures with well-defined walls outlining corridors.
+// https://conwaylife.com/wiki/OCA:Maze
+pub fn step_maze(grid: &mut Grid, x: usize, y: usize) {
+    let mut maze_neighbors = 0;
+
+    // Check all neighboring cells
+    for dx in -1..=1 {
+        for dy in -1..=1 {
+            // Skip the current cell
+            if dx == 0 && dy == 0 {
+                continue;
+            }
+
+            let nx = x as i32 + dx;
+            let ny = y as i32 + dy;
+
+            // Check if the neighboring cell is within the grid bounds
+            if nx >= 0 && nx < grid.width as i32 && ny >= 0 && ny < grid.height as i32 {
+                let neighbor = grid.get((nx as usize, ny as usize));
+
+                // Check if the neighboring cell is not a maze cell
+                if neighbor != MAZE {
+                    // Check if the neighboring cell has 3 neighbors
+                    let mut neighbor_neighbors = 0;
+
+                    for ddx in -1..=1 {
+                        for ddy in -1..=1 {
+                            // Skip the current cell and the neighboring cell
+                            if (ddx == 0 && ddy == 0) || (ddx == dx && ddy == dy) {
+                                continue;
+                            }
+
+                            let nnx = nx + ddx;
+                            let nny = ny + ddy;
+
+                            // Check if the neighbor of the neighboring cell is within the grid bounds
+                            if nnx >= 0
+                                && nnx < grid.width as i32
+                                && nny >= 0
+                                && nny < grid.height as i32
+                            {
+                                let neighbor_neighbor = grid.get((nnx as usize, nny as usize));
+
+                                // Check if the neighbor of the neighboring cell is a maze cell
+                                if neighbor_neighbor == MAZE {
+                                    neighbor_neighbors += 1;
+                                }
+                            }
+                        }
+                    }
+
+                    // Set the neighboring cell to maze if it has 3 neighbors
+                    if neighbor_neighbors == 3 {
+                        grid.set((nx as usize, ny as usize), MAZE);
+                    }
+                }
+            }
+        }
+    }
+
+    // Check the current cell
+    if grid.get((x, y)) == MAZE {
+        let mut current_neighbors = 0;
+
+        for dx in -1..=1 {
+            for dy in -1..=1 {
+                // Skip the current cell
+                if dx == 0 && dy == 0 {
+                    continue;
+                }
+
+                let nx = x as i32 + dx;
+                let ny = y as i32 + dy;
+
+                // Check if the neighbor of the current cell is within the grid bounds
+                if nx >= 0 && nx < grid.width as i32 && ny >= 0 && ny < grid.height as i32 {
+                    let neighbor = grid.get((nx as usize, ny as usize));
+
+                    // Check if the neighbor of the current cell is a maze cell
+                    if neighbor == MAZE {
+                        current_neighbors += 1;
+                    }
+                }
+            }
+        }
+
+        // Set the current cell to nothing if it has less than 1 or more than 5 neighbors
+        if current_neighbors < 1 || current_neighbors > 5 {
+            grid.set((x, y), NOTHING);
+        }
     }
 }
