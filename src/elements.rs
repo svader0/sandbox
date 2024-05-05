@@ -12,6 +12,7 @@ use crate::grid::Grid;
 pub struct Element {
     pub element_type: ElementType,
     pub color: Option<Color>,
+    pub color_variance: f32,
     pub name: &'static str,
 }
 
@@ -45,42 +46,49 @@ impl Element {
 pub static AIR: Element = Element {
     element_type: ElementType::Gas,
     color: Some(SKYBLUE),
+    color_variance: 0.05,
     name: "Air",
 };
 
 pub static SAND: Element = Element {
     element_type: ElementType::MoveableSolid,
     color: Some(GOLD),
+    color_variance: 0.04,
     name: "Sand",
 };
 
 pub static WATER: Element = Element {
     element_type: ElementType::Liquid,
     color: Some(BLUE),
+    color_variance: 0.1,
     name: "Water",
 };
 
 pub static STONE: Element = Element {
     element_type: ElementType::ImmovableSolid,
     color: Some(DARKGRAY),
+    color_variance: 0.0,
     name: "Stone",
 };
 
 pub static FAUCET: Element = Element {
     element_type: ElementType::PixelGenerator,
     color: Some(WHITE),
+    color_variance: 0.0,
     name: "Faucet",
 };
 
 pub static CLAY: Element = Element {
     element_type: ElementType::MoveableSolid,
     color: Some(BROWN),
+    color_variance: 0.0,
     name: "Clay",
 };
 
 pub static NOTHING: Element = Element {
     element_type: ElementType::Nothing,
     color: None,
+    color_variance: 0.0,
     name: "Nothing",
 };
 

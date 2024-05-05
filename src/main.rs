@@ -4,6 +4,7 @@ pub mod element_type;
 pub mod elements;
 pub mod grid;
 use elements::{Element, AIR, CLAY, FAUCET, MAZE, NOTHING, SAND, STONE, WATER};
+use ::rand::{thread_rng, Rng};
 use grid::Grid;
 
 // Constants
@@ -59,8 +60,9 @@ async fn main() {
     control_manager.add_control(
         KeyCode::M,
         Box::new(|elem| *elem = MAZE),
-        String::from("M: clay"),
+        String::from("M: maze"),
     );
+
 
     // Define brush size controls
     control_manager.add_brush_control(
@@ -83,6 +85,8 @@ async fn main() {
             //change in window
             grid.update_cell_size(screen_height());
         }
+
+        let mut rng = thread_rng();
 
         //inputs
         if is_key_pressed(KeyCode::R) {
@@ -122,7 +126,15 @@ async fn main() {
             for x in 0..screen_width() as usize - 20 {
                 let cell = grid.get((x, y));
                 let color = match cell.get_color() {
-                    Some(color) => color,
+                    Some(color) => {
+                        let variance = cell.color_variance;
+                        // Add some variance to the color of each cell, per frame.
+                        // Creates a sort of "shimmering" effect.
+                        let r = color.r * (1.0 - variance) + (variance * rng.gen_range(0.0..1.0));
+                        let g = color.g * (1.0 - variance) + (variance * rng.gen_range(0.0..1.0));
+                        let b = color.b * (1.0 - variance) + (variance * rng.gen_range(0.0..1.0));
+                        Color::new(r, g, b, color.a)
+                    }
                     None => continue,
                 };
                 // Draw the grid
