@@ -1,8 +1,8 @@
 use crate::elements::{Element, NOTHING};
 
 // constants
-const GRID_WIDTH: usize = 300;
-const GRID_HEIGHT: usize = 200;
+pub const GRID_WIDTH: usize = 800;
+pub const GRID_HEIGHT: usize = 400;
 
 pub type Vector2 = (usize, usize);
 
@@ -19,7 +19,7 @@ impl Grid {
         Grid {
             width: GRID_WIDTH,
             height: GRID_HEIGHT,
-            cell_size: screen_height * 0.8 / GRID_HEIGHT as f32,
+            cell_size: screen_height / GRID_HEIGHT as f32,
             elements: vec![NOTHING; GRID_WIDTH * GRID_HEIGHT],
         }
     }
@@ -65,7 +65,7 @@ impl Grid {
     }
 
     pub fn update_cell_size(&mut self, screen_height: f32) {
-        self.cell_size = screen_height * 0.8 / GRID_HEIGHT as f32;
+        self.cell_size = screen_height / GRID_HEIGHT as f32;
     }
 
     // Apply the function to each element in between two positions
