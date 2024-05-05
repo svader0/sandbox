@@ -3,19 +3,9 @@ use macroquad::prelude::*;
 pub mod element_type;
 pub mod elements;
 pub mod grid;
+use elements::{Element, AIR, CLAY, FAUCET, MAZE, NOTHING, SAND, STONE, WATER};
 use ::rand::{thread_rng, Rng};
-use elements::{Element, AIR, CLAY, FAUCET, NOTHING, SAND, STONE, WATER};
 use grid::Grid;
-
-/*
-    TODO:
-    1. use traverse_line to draw smoother lines when drawing with the mouse
-    2. add a way to clear the grid
-    3. fix sand behavior (it does the same thing that water used to do)
-        - It also doesn't displace the water properly
-    4. add realism to elements
-    5. multithreading?
-*/
 
 // Constants
 const BACKGROUND_COLOR: Color = BLACK;
@@ -34,6 +24,7 @@ async fn main() {
     let mut selected_element = SAND;
     let mut brush_size = 1;
 
+    // The Control Manager stores all of our controls in a neat and tidy way.
     let mut control_manager = ControlManager::new();
 
     control_manager.add_control(
@@ -66,6 +57,12 @@ async fn main() {
         Box::new(|elem| *elem = CLAY),
         String::from("L: clay"),
     );
+    control_manager.add_control(
+        KeyCode::M,
+        Box::new(|elem| *elem = MAZE),
+        String::from("M: maze"),
+    );
+
 
     // Define brush size controls
     control_manager.add_brush_control(

@@ -1,8 +1,9 @@
+use ::rand::Rng;
 use macroquad::prelude::*;
 
 use crate::element_type::{
-    step_gas, step_immoveable_solid, step_liquid, step_moveable_solid, step_pixel_generator,
-    ElementType,
+    step_gas, step_immoveable_solid, step_liquid, step_maze, step_moveable_solid,
+    step_pixel_generator, ElementType,
 };
 use crate::grid::Grid;
 
@@ -26,6 +27,7 @@ impl Element {
             ElementType::Liquid => step_liquid(grid, x, y, 4),
             ElementType::Gas => step_gas(grid, x, y, 1),
             ElementType::PixelGenerator => step_pixel_generator(grid, x, y),
+            ElementType::Maze => step_maze(grid, x, y),
             _ => {}
         }
     }
@@ -88,4 +90,10 @@ pub static NOTHING: Element = Element {
     color: None,
     color_variance: 0.0,
     name: "Nothing",
+};
+
+pub static MAZE: Element = Element {
+    element_type: ElementType::Maze,
+    color: Some(WHITE),
+    name: "Maze",
 };

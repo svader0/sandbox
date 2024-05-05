@@ -5,6 +5,7 @@ Sort of like Powder Game. Use the 'z', 'x', and 'c' keys to change between water
 Press left and right brackets to change the brush size.
 
 ![Sample Image from In-game](example.png)
+![Sample Image from In-game](example2.png)
 
 ## How to run
 
