@@ -138,33 +138,7 @@ pub fn step_maze(grid: &mut Grid, x: usize, y: usize) {
                 // Check if the neighboring cell is not a maze cell
                 if neighbor != MAZE {
                     // Check if the neighboring cell has 3 neighbors
-                    let mut neighbor_neighbors = 0;
-
-                    for ddx in -1..=1 {
-                        for ddy in -1..=1 {
-                            // Skip the current cell and the neighboring cell
-                            if (ddx == 0 && ddy == 0) || (ddx == dx && ddy == dy) {
-                                continue;
-                            }
-
-                            let nnx = nx + ddx;
-                            let nny = ny + ddy;
-
-                            // Check if the neighbor of the neighboring cell is within the grid bounds
-                            if nnx >= 0
-                                && nnx < grid.width as i32
-                                && nny >= 0
-                                && nny < grid.height as i32
-                            {
-                                let neighbor_neighbor = grid.get((nnx as usize, nny as usize));
-
-                                // Check if the neighbor of the neighboring cell is a maze cell
-                                if neighbor_neighbor == MAZE {
-                                    neighbor_neighbors += 1;
-                                }
-                            }
-                        }
-                    }
+                    let neighbor_neighbors = count_maze_neighbors(grid, nx as usize, ny as usize);
 
                     // Set the neighboring cell to maze if it has 3 neighbors
                     if neighbor_neighbors == 3 {
@@ -177,33 +151,39 @@ pub fn step_maze(grid: &mut Grid, x: usize, y: usize) {
 
     // Check the current cell
     if grid.get((x, y)) == MAZE {
-        let mut current_neighbors = 0;
-
-        for dx in -1..=1 {
-            for dy in -1..=1 {
-                // Skip the current cell
-                if dx == 0 && dy == 0 {
-                    continue;
-                }
-
-                let nx = x as i32 + dx;
-                let ny = y as i32 + dy;
-
-                // Check if the neighbor of the current cell is within the grid bounds
-                if nx >= 0 && nx < grid.width as i32 && ny >= 0 && ny < grid.height as i32 {
-                    let neighbor = grid.get((nx as usize, ny as usize));
-
-                    // Check if the neighbor of the current cell is a maze cell
-                    if neighbor == MAZE {
-                        current_neighbors += 1;
-                    }
-                }
-            }
-        }
+        let current_neighbors = count_maze_neighbors(grid, x, y);
 
         // Set the current cell to nothing if it has less than 1 or more than 5 neighbors
         if current_neighbors < 1 || current_neighbors > 5 {
             grid.set((x, y), NOTHING);
         }
     }
+}
+
+fn count_maze_neighbors(grid: &Grid, x: usize, y: usize) -> usize {
+    let mut neighbor_neighbors = 0;
+
+    for dx in -1..=1 {
+        for dy in -1..=1 {
+            // Skip the current cell and the neighboring cell
+            if (dx == 0 && dy == 0) || (dx == 0 && dy == 0) {
+                continue;
+            }
+
+            let nx = x as i32 + dx;
+            let ny = y as i32 + dy;
+
+            // Check if the neighbor of the current cell is within the grid bounds
+            if nx >= 0 && nx < grid.width as i32 && ny >= 0 && ny < grid.height as i32 {
+                let neighbor = grid.get((nx as usize, ny as usize));
+
+                // Check if the neighbor of the current cell is a maze cell
+                if neighbor == MAZE {
+                    neighbor_neighbors += 1;
+                }
+            }
+        }
+    }
+
+    neighbor_neighbors
 }

@@ -1,3 +1,4 @@
+use ::rand::Rng;
 use macroquad::prelude::*;
 
 use crate::element_type::{
