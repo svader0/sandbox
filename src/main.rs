@@ -3,8 +3,8 @@ use macroquad::prelude::*;
 pub mod element_type;
 pub mod elements;
 pub mod grid;
-use elements::{Element, AIR, CLAY, FAUCET, MAZE, NOTHING, SAND, STONE, WATER};
 use ::rand::{thread_rng, Rng};
+use elements::{Element, AIR, CLAY, FAUCET, MAZE, NOTHING, SAND, STONE, WATER};
 use grid::Grid;
 
 // Constants
@@ -27,6 +27,7 @@ async fn main() {
     // The Control Manager stores all of our controls in a neat and tidy way.
     let mut control_manager = ControlManager::new();
 
+    // Add all our buttons to the control manager
     control_manager.add_control(
         KeyCode::Z,
         Box::new(|elem| *elem = WATER),
@@ -63,7 +64,6 @@ async fn main() {
         String::from("M: maze"),
     );
 
-
     // Define brush size controls
     control_manager.add_brush_control(
         KeyCode::LeftBracket,
@@ -76,6 +76,8 @@ async fn main() {
         String::from("]: brush+1"),
     );
 
+    let mut rng = thread_rng();
+
     // main game loop
     loop {
         grid.update();
@@ -86,8 +88,6 @@ async fn main() {
             grid.update_cell_size(screen_height());
         }
 
-        let mut rng = thread_rng();
-
         //inputs
         if is_key_pressed(KeyCode::R) {
             //put here so it has access to grid. Temp?
@@ -95,39 +95,33 @@ async fn main() {
         }
         clear_background(BACKGROUND_COLOR);
         if !control_manager.handle_input(&mut selected_element, &mut brush_size) {
-            break; // Escape was pressed
+            // When handle_input returns false, it means we've pressed the escape key and want to quit.
+            break;
         }
-        handle_mouse_input(&mut grid, &selected_element, &brush_size);
-        // Draw text
-        let top_of_text = (screen_height() * 0.9).round();
-        let framerate: String = String::from("fps: ") + &get_fps().to_string();
-        draw_text(&framerate, 10.0, top_of_text + 20.0, 30.0, WHITE);
-        let selected_element_text =
-            String::from("Selected element: ") + selected_element.to_string();
-        draw_text(
-            &selected_element_text,
-            10.0,
-            top_of_text + 50.0,
-            30.0,
-            WHITE,
-        );
-        let brush_size_text = String::from("Brush size: ") + &brush_size.to_string();
-        draw_text(&brush_size_text, 10.0, top_of_text + 80.0, 30.0, WHITE);
-        draw_text(
-            &control_manager.controls_string(),
-            10.0,
-            (screen_height() * 0.9).round(),
-            30.0,
-            WHITE,
-        );
 
-        //render grid
-        for y in 0..screen_height() as usize - 20 {
-            for x in 0..screen_width() as usize - 20 {
-                let cell = grid.get((x, y));
-                let color = match cell.get_color() {
-                    Some(color) => {
-                        let variance = cell.color_variance;
+        draw_controls(&control_manager, &selected_element, brush_size);
+
+        handle_mouse_input(&mut grid, &selected_element, &brush_size);
+
+        render_grid(&grid, &mut rng);
+
+        draw_brush_box(&grid, brush_size);
+
+        next_frame().await
+    }
+}
+
+fn render_grid(grid: &Grid, rng: &mut impl Rng) {
+    //render grid
+    for y in 0..screen_height() as usize - 20 {
+        for x in 0..screen_width() as usize - 20 {
+            let cell = grid.get((x, y));
+            let color = match cell.get_color() {
+                Some(color) => {
+                    let variance = cell.color_variance;
+                    if variance == 0.0 {
+                        color
+                    } else {
                         // Add some variance to the color of each cell, per frame.
                         // Creates a sort of "shimmering" effect.
                         let r = color.r * (1.0 - variance) + (variance * rng.gen_range(0.0..1.0));
@@ -135,34 +129,61 @@ async fn main() {
                         let b = color.b * (1.0 - variance) + (variance * rng.gen_range(0.0..1.0));
                         Color::new(r, g, b, color.a)
                     }
-                    None => continue,
-                };
-                // Draw the grid
-                draw_rectangle(
-                    x as f32 * grid.cell_size,
-                    y as f32 * grid.cell_size,
-                    grid.cell_size,
-                    grid.cell_size,
-                    color,
-                );
-            }
+                }
+                None => continue,
+            };
+            // Draw the cell
+            draw_rectangle(
+                x as f32 * grid.cell_size,
+                y as f32 * grid.cell_size,
+                grid.cell_size,
+                grid.cell_size,
+                color,
+            );
         }
-
-        // Draw a box of size brush_size around the mouse
-        let brush_offset = (brush_size - 1) / 2;
-        let x_brush_box = (mouse_position().0 / grid.cell_size) as isize - brush_offset as isize;
-        let y_brush_box = (mouse_position().1 / grid.cell_size) as isize - brush_offset as isize;
-        draw_rectangle_lines(
-            x_brush_box as f32 * grid.cell_size,
-            y_brush_box as f32 * grid.cell_size,
-            brush_size as f32 * grid.cell_size,
-            brush_size as f32 * grid.cell_size,
-            2.0,
-            RED,
-        );
-
-        next_frame().await
     }
+}
+
+fn draw_controls(control_manager: &ControlManager, selected_element: &Element, brush_size: usize) {
+    let top_of_text = 20.0;
+    let framerate: String = String::from("fps: ") + &get_fps().to_string();
+    draw_text(&framerate, 10.0, top_of_text, 20.0, WHITE);
+    let selected_element_text = String::from("Selected element: ") + selected_element.to_string();
+    draw_text(
+        &selected_element_text,
+        10.0,
+        top_of_text + 20.0,
+        20.0,
+        WHITE,
+    );
+    let brush_size_text = String::from("Brush size: ") + &brush_size.to_string();
+    draw_text(&brush_size_text, 10.0, top_of_text + 40.0, 20.0, WHITE);
+    let controls = control_manager.get_controls();
+    let brush_controls = control_manager.get_brush_controls();
+    let mut y_offset = top_of_text + 60.0;
+    for control in controls {
+        draw_text(&control.description, 10.0, y_offset, 20.0, WHITE);
+        y_offset += 20.0;
+    }
+    for brush_control in brush_controls {
+        draw_text(&brush_control.description, 10.0, y_offset, 20.0, WHITE);
+        y_offset += 20.0;
+    }
+    draw_text("esc: quit, r: reset", 10.0, y_offset, 20.0, WHITE);
+}
+
+fn draw_brush_box(grid: &Grid, brush_size: usize) {
+    let brush_offset = (brush_size - 1) / 2;
+    let x_brush_box = (mouse_position().0 / grid.cell_size) as isize - brush_offset as isize;
+    let y_brush_box = (mouse_position().1 / grid.cell_size) as isize - brush_offset as isize;
+    draw_rectangle_lines(
+        x_brush_box as f32 * grid.cell_size,
+        y_brush_box as f32 * grid.cell_size,
+        brush_size as f32 * grid.cell_size,
+        brush_size as f32 * grid.cell_size,
+        2.0,
+        RED,
+    );
 }
 
 fn place_element(grid: &mut Grid, selected_element: &Element, brush_size: &mut usize) {
@@ -248,6 +269,7 @@ impl ControlManager {
         true
     }
 
+    #[allow(dead_code)]
     fn controls_string(&self) -> String {
         let mut result = String::from("Controls:\n");
         for control in &self.controls {
@@ -261,6 +283,14 @@ impl ControlManager {
         //manually added controls
         result += "\nesc: quit, r: reset";
         result
+    }
+
+    fn get_controls(&self) -> &Vec<Control> {
+        &self.controls
+    }
+
+    fn get_brush_controls(&self) -> &Vec<BrushControl> {
+        &self.brush_size_controls
     }
 }
 

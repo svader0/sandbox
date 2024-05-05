@@ -34,7 +34,7 @@ pub fn step_moveable_solid(grid: &mut Grid, x: usize, y: usize) {
         }
 
         if !options.is_empty() {
-            let random_index = thread_rng().gen_range(0..options.len());
+            let random_index = rand::gen_range(0, options.len());
             let (new_x, new_y) = options[random_index];
             grid.move_element((x, y), (new_x, new_y));
         }
