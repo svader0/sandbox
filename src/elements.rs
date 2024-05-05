@@ -95,5 +95,6 @@ pub static NOTHING: Element = Element {
 pub static MAZE: Element = Element {
     element_type: ElementType::Maze,
     color: Some(WHITE),
+    color_variance: 0.0,
     name: "Maze",
 };
