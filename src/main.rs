@@ -4,7 +4,7 @@ pub mod element_type;
 pub mod elements;
 pub mod grid;
 use ::rand::{thread_rng, Rng};
-use elements::{Element, AIR, CLAY, FAUCET, MAZE, NOTHING, SAND, STONE, WATER};
+use elements::{Element, AIR, CLAY, FAUCET, FIRE, MAZE, NOTHING, SAND, STONE, WATER};
 use grid::Grid;
 
 // Constants
@@ -63,16 +63,21 @@ async fn main() {
         Box::new(|elem| *elem = MAZE),
         String::from("M: maze"),
     );
+    control_manager.add_control(
+        KeyCode::F,
+        Box::new(|elem| *elem = FIRE),
+        String::from("F: fire"),
+    );
 
     // Define brush size controls
     control_manager.add_brush_control(
         KeyCode::LeftBracket,
-        |size| size - 1,
+        |size| size.saturating_sub(1),
         String::from("[: brush-1"),
     );
     control_manager.add_brush_control(
         KeyCode::RightBracket,
-        |size| size + 1,
+        |size| size.saturating_add(1),
         String::from("]: brush+1"),
     );
 

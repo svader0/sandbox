@@ -1,4 +1,4 @@
-use crate::elements::{Element, AIR, MAZE, NOTHING, WATER};
+use crate::elements::{Element, AIR, FIRE, MAZE, NOTHING, WATER};
 use crate::grid::Grid;
 use ::rand::{thread_rng, Rng};
 use macroquad::prelude::*;
@@ -12,6 +12,7 @@ pub enum ElementType {
     PixelGenerator,
     Maze,
     Nothing,
+    Fire,
 }
 
 pub fn step_moveable_solid(grid: &mut Grid, x: usize, y: usize) {
@@ -105,6 +106,32 @@ pub fn step_liquid(grid: &mut Grid, x: usize, y: usize, dispersion_rate: usize) 
                 }
             }
         }
+    }
+}
+
+pub fn step_fire(grid: &mut Grid, x: usize, y: usize) {
+    let mut rng = thread_rng();
+    let upward_chance = 0.7;
+
+    // Check if the pixel above is empty and within grid bounds
+    if y > 0 && grid.get((x, y - 1)) == NOTHING {
+        // Move upward with a chance based on upward_chance
+        if rng.gen::<f32>() < upward_chance {
+            grid.move_element((x, y), (x, y - 1));
+            return; // Fire moves only once per step
+        }
+    }
+
+    // If no upward movement occurred, the fire drifts randomly
+    let drift_direction = rng.gen_range(-1..=1); // -1 for left, 0 for no drift, 1 for right
+    let new_x = (x as i32 + drift_direction) as usize;
+
+    // Check if the new position is within grid bounds and empty
+    if new_x < grid.width && grid.get((new_x, y)) == NOTHING {
+        grid.move_element((x, y), (new_x, y));
+    } else {
+        // If no movement is possible, the fire dies out, turning into NOTHING
+        grid.set((x, y), NOTHING);
     }
 }
 
