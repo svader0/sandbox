@@ -2,7 +2,7 @@ use macroquad::prelude::*;
 
 use crate::element_type::{
     step_fire, step_gas, step_immoveable_solid, step_liquid, step_maze, step_moveable_solid,
-    step_pixel_generator, ElementType,
+    step_pixel_destroyer, step_pixel_generator, ElementType,
 };
 use crate::grid::Grid;
 
@@ -26,6 +26,7 @@ impl Element {
             ElementType::Liquid => step_liquid(grid, x, y, 4),
             ElementType::Gas => step_gas(grid, x, y, 1),
             ElementType::PixelGenerator => step_pixel_generator(grid, x, y),
+            ElementType::PixelDestroyer => step_pixel_destroyer(grid, x, y),
             ElementType::Maze => step_maze(grid, x, y),
             ElementType::Fire => step_fire(grid, x, y),
             _ => {}
@@ -104,4 +105,11 @@ pub static FIRE: Element = Element {
     color: Some(RED),
     color_variance: 0.0,
     name: "Fire",
+};
+
+pub static DRAIN: Element = Element {
+    element_type: ElementType::PixelDestroyer,
+    color: Some(DARKGRAY),
+    color_variance: 0.0,
+    name: "Drain",
 };

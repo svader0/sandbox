@@ -1,4 +1,4 @@
-use crate::elements::{Element, AIR, FIRE, MAZE, NOTHING, WATER};
+use crate::elements::{Element, AIR, DRAIN, FIRE, MAZE, NOTHING, WATER};
 use crate::grid::Grid;
 use ::rand::{thread_rng, Rng};
 use macroquad::prelude::*;
@@ -10,6 +10,7 @@ pub enum ElementType {
     Liquid,
     Gas,
     PixelGenerator,
+    PixelDestroyer,
     Maze,
     Nothing,
     Fire,
@@ -139,6 +140,28 @@ pub fn step_pixel_generator(grid: &mut Grid, x: usize, y: usize) {
     // Check if there is air below
     if y + 1 < grid.height && grid.get((x, y + 1)) == NOTHING {
         grid.set((x, y + 1), WATER);
+    }
+}
+
+pub fn step_pixel_destroyer(grid: &mut Grid, x: usize, y: usize) {
+    // kill all neighbors
+    for dx in -1..=1 {
+        for dy in -1..=1 {
+            // Skip the current cell
+            if dx == 0 && dy == 0 {
+                continue;
+            }
+
+            let nx = x as i32 + dx;
+            let ny = y as i32 + dy;
+
+            if nx >= 0 && nx < grid.width as i32 && ny >= 0 && ny < grid.height as i32 {
+                // Check if the neighboring cell is not a pixel destroyer
+                if grid.get((nx as usize, ny as usize)) != DRAIN {
+                    grid.set((nx as usize, ny as usize), NOTHING);
+                }
+            }
+        }
     }
 }
 
